@@ -73,42 +73,39 @@ class Group(Elem):
             self._chars = f"(?:{self._chars})"
 
 
+class CharSetChar:
+    REGEX_META_CHARS = {']', '\\', '^', '-'}
+
+    def __init__(self, char: str):
+        self._char = '\\' + char if char in self.REGEX_META_CHARS else char
+
+    def __str__(self):
+        return self._char
+
+    def __add__(self, other: 'CharSetChar'):
+        new_csc = CharSetChar("")
+        new_csc._char = self._char + other._char
+        return new_csc
+
+
 class CharSet(Elem):
-    class CharSetChar:
-        REGEX_META_CHARS = {']', '\\', '^', '-'}
-
-        def __init__(self, char: str):
-            self._char = '\\' + char if char in self.REGEX_META_CHARS else char
-
-        def __str__(self):
-            return self._char
-
-        def __add__(self, other: 'CharSet.CharSetChar'):
-            new_csc = CharSet.CharSetChar("")
-            new_csc._char = self._char + other._char
-            return new_csc
 
     def __init__(self, chars_list: list[Union[str, CharSetChar]], is_exclude=False):
         super().__init__("")
         self._chars = "[^" if is_exclude else "["
 
         for chars in chars_list:
-            if isinstance(chars, self.CharSetChar):
+            if isinstance(chars, CharSetChar):
                 self._chars += str(chars)
             elif isinstance(chars, str):
-                self._chars += "".join((str(self.CharSetChar(char)) for char in chars))
+                self._chars += "".join((str(CharSetChar(char)) for char in chars))
             else:
                 pass
 
         self._chars += "]"
 
 
-class CSRange(CharSet.CharSetChar):
-    a2z = None
-    A2Z = None
-    zero2nine = None
-    a2z_A2Z_029 = None
-    a2z_A2Z = None
+class CSRange(CharSetChar):
 
     def __init__(self, start_char: str, end_char: str):
         super().__init__("")
@@ -119,6 +116,38 @@ class CSRange(CharSet.CharSetChar):
             pass
 
         self._char = f"{start_char}-{end_char}"
+
+
+class WordBoundary(Elem):
+    def __init__(self, word: Union[str, Elem], left_on: bool = True, right_on: bool = True):
+        super().__init__("")
+        if isinstance(word, str):
+            self._chars = ''.join((self.Char(char) for char in word))
+        elif isinstance(word, Elem):
+            self._chars = str(word)
+        else:
+            pass
+
+        if left_on:
+            self._chars = r"\b" + self._chars
+        if right_on:
+            self._chars += r"\b"
+
+
+class NonWordBoundary(Elem):
+    def __init__(self, word: str, left_on: bool = True, right_on: bool = True):
+        super().__init__("")
+        if isinstance(word, str):
+            self._chars = ''.join((self.Char(char) for char in word))
+        elif isinstance(word, Elem):
+            self._chars = str(word)
+        else:
+            pass
+
+        if left_on:
+            self._chars = r"\B" + self._chars
+        if right_on:
+            self._chars += r"\B"
 
 
 class Op:
@@ -188,8 +217,13 @@ class Regexp:
         self.__regexp += "$"
         return self.__regexp
 
-    def done(self):
-        return self.__regexp
+    def ignore_case_from_here(self):
+        self.__regexp += "(?i)"
+        return self
+
+    def notice_case_from_here(self):
+        self.__regexp += "(?-i)"
+        return self
 
     def zero_or_once(self, elem: 'Union[Elem, str]'):
         self.__regexp += str(Op.zero_or_once(elem))
@@ -218,3 +252,6 @@ class Regexp:
     def then(self, elem: 'Union[Elem, str]'):
         self.__regexp += str(Op.then(elem))
         return self
+
+    def done(self):
+        return self.__regexp
