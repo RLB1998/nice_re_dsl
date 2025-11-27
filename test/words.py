@@ -1,12 +1,12 @@
-import nice_re_dsl as nerd
+import nice_re_dsl as nrd
 
-words_regexp = nerd.Regexp() \
+words_regexp = nrd.Regexp() \
     .from_here_ignore_case() \
-    .then(nerd.WORD_BOUNDARY) \
+    .then(nrd.WORD_BOUNDARY) \
     .once_or_more(
-    nerd.CharSet([nerd.a2z_A2Z, "'-"])
+    nrd.CharSet([nrd.a2z_A2Z, "'-"])
 ) \
-    .then(nerd.WORD_BOUNDARY) \
+    .then(nrd.WORD_BOUNDARY) \
     .done()
 
 print(words_regexp)
