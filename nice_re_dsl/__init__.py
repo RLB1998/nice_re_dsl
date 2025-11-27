@@ -1,5 +1,5 @@
 from .app import Elem, Group, CharSet, ProcessedElem
-from .app import WordBoundary, NonWordBoundary
+from .app import WordBoundary, NonWordBoundary, PartIgnoreCase, PartNoticeCase
 from .app import Op
 from .app import Regexp
 from .app import CSRange

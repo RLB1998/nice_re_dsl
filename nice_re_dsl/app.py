@@ -135,7 +135,7 @@ class WordBoundary(Elem):
 
 
 class NonWordBoundary(Elem):
-    def __init__(self, word: str, left_on: bool = True, right_on: bool = True):
+    def __init__(self, word: Union[str, Elem], left_on: bool = True, right_on: bool = True):
         super().__init__("")
         if isinstance(word, str):
             self._chars = ''.join((self.Char(char) for char in word))
@@ -148,6 +148,32 @@ class NonWordBoundary(Elem):
             self._chars = r"\B" + self._chars
         if right_on:
             self._chars += r"\B"
+
+
+class PartIgnoreCase(Group):
+    def __init__(self, content: Union[str, Elem]):
+        super().__init__((), is_catch=False, is_alternative=False)
+        if isinstance(content, str):
+            self._chars = ''.join((self.Char(char) for char in content))
+        elif isinstance(content, Elem):
+            self._chars = str(content)
+        else:
+            pass
+
+        self._chars = f"(?i:{self._chars})"
+
+
+class PartNoticeCase(Group):
+    def __init__(self, content: Union[str, Elem]):
+        super().__init__((), is_catch=False, is_alternative=False)
+        if isinstance(content, str):
+            self._chars = ''.join((self.Char(char) for char in content))
+        elif isinstance(content, Elem):
+            self._chars = str(content)
+        else:
+            pass
+
+        self._chars = f"(?-i:{self._chars})"
 
 
 class Op:
@@ -217,11 +243,11 @@ class Regexp:
         self.__regexp += "$"
         return self.__regexp
 
-    def ignore_case_from_here(self):
+    def from_here_ignore_case(self):
         self.__regexp += "(?i)"
         return self
 
-    def notice_case_from_here(self):
+    def from_here_notice_case(self):
         self.__regexp += "(?-i)"
         return self
 

@@ -1,7 +1,7 @@
 import nice_re_dsl as nerd
 
 words_regexp = nerd.Regexp() \
-    .ignore_case_from_here() \
+    .from_here_ignore_case() \
     .then(
     nerd.WordBoundary(
         nerd.Op.once_or_more(
