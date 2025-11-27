@@ -118,38 +118,6 @@ class CSRange(CharSetChar):
         self._char = f"{start_char}-{end_char}"
 
 
-class WordBoundary(Elem):
-    def __init__(self, word: Union[str, Elem], left_on: bool = True, right_on: bool = True):
-        super().__init__("")
-        if isinstance(word, str):
-            self._chars = ''.join((self.Char(char) for char in word))
-        elif isinstance(word, Elem):
-            self._chars = str(word)
-        else:
-            pass
-
-        if left_on:
-            self._chars = r"\b" + self._chars
-        if right_on:
-            self._chars += r"\b"
-
-
-class NonWordBoundary(Elem):
-    def __init__(self, word: Union[str, Elem], left_on: bool = True, right_on: bool = True):
-        super().__init__("")
-        if isinstance(word, str):
-            self._chars = ''.join((self.Char(char) for char in word))
-        elif isinstance(word, Elem):
-            self._chars = str(word)
-        else:
-            pass
-
-        if left_on:
-            self._chars = r"\B" + self._chars
-        if right_on:
-            self._chars += r"\B"
-
-
 class PartIgnoreCase(Group):
     def __init__(self, content: Union[str, Elem]):
         super().__init__((), is_catch=False, is_alternative=False)
@@ -251,7 +219,7 @@ class Regexp:
         self.__regexp += "(?-i)"
         return self
 
-    def from_here_match_multiline(self):
+    def from_here_match_multilines(self):
         self.__regexp += "(?s)"
         return self
 

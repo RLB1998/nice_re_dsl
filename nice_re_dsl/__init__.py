@@ -1,11 +1,11 @@
 from .app import Elem, Group, CharSet, ProcessedElem
-from .app import WordBoundary, NonWordBoundary, PartIgnoreCase, PartNoticeCase
+from .app import PartIgnoreCase, PartNoticeCase
 from .app import Op
 from .app import Regexp
 from .app import CSRange
 
 ANY_CHAR = ProcessedElem('.')
-ANY_CHAR_MULTILINE = Group((ProcessedElem("?s:."),), is_catch=True, is_alternative=False)
+ANY_CHAR_MULTILINES = Group((ProcessedElem("?s:."),), is_catch=True, is_alternative=False)
 NEWLINE = ProcessedElem(r'\n')
 TAB = ProcessedElem(r'\t')
 SPACE = ProcessedElem(r'\s')
@@ -14,6 +14,8 @@ LETTER_NUM_UNDERLINE = ProcessedElem(r'\w')
 NON_LETTER_NUM_UNDERLINE = ProcessedElem(r'\W')
 NUMBER = ProcessedElem(r'\d')
 NON_NUMBER = ProcessedElem(r'\D')
+WORD_BOUNDARY = ProcessedElem(r'\b')
+NON_WORD_BOUNDARY = ProcessedElem(r'\B')
 
 a2z = CSRange('a', 'z')
 A2Z = CSRange('A', 'Z')
