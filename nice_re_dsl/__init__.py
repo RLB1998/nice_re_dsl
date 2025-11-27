@@ -5,6 +5,7 @@ from .app import Regexp
 from .app import CSRange
 
 ANY_CHAR = ProcessedElem('.')
+ANY_CHAR_MULTILINE = Group((ProcessedElem("?s:."),), is_catch=True, is_alternative=False)
 NEWLINE = ProcessedElem(r'\n')
 TAB = ProcessedElem(r'\t')
 SPACE = ProcessedElem(r'\s')

@@ -251,6 +251,10 @@ class Regexp:
         self.__regexp += "(?-i)"
         return self
 
+    def from_here_match_multiline(self):
+        self.__regexp += "(?s)"
+        return self
+
     def zero_or_once(self, elem: 'Union[Elem, str]'):
         self.__regexp += str(Op.zero_or_once(elem))
         return self
