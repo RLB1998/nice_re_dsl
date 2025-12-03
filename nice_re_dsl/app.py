@@ -26,20 +26,20 @@ class Elem:
     def zero_or_once(self, elem: 'Union[Elem, str]'):
         return ProcessedElem(self._chars + str(Op.zero_or_once(elem)))
 
-    def zero_or_more(self, elem: 'Union[Elem, str]'):
-        return ProcessedElem(self._chars + str(Op.zero_or_more(elem)))
+    def zero_or_more(self, elem: 'Union[Elem, str]', non_greedy: bool = False):
+        return ProcessedElem(self._chars + str(Op.zero_or_more(elem, non_greedy)))
 
-    def once_or_more(self, elem: 'Union[Elem, str]'):
-        return ProcessedElem(self._chars + str(Op.once_or_more(elem)))
+    def once_or_more(self, elem: 'Union[Elem, str]', non_greedy: bool = False):
+        return ProcessedElem(self._chars + str(Op.once_or_more(elem, non_greedy)))
 
     def repeat_n(self, elem: 'Union[Elem, str]', n: int):
         return ProcessedElem(self._chars + str(Op.repeat_n(elem, n)))
 
-    def repeat_at_least(self, elem: 'Union[Elem, str]', n: int):
-        return ProcessedElem(self._chars + str(Op.repeat_at_least(elem, n)))
+    def repeat_at_least(self, elem: 'Union[Elem, str]', n: int, non_greedy: bool = False):
+        return ProcessedElem(self._chars + str(Op.repeat_at_least(elem, n, non_greedy)))
 
-    def repeat_n2m(self, elem: 'Union[Elem, str]', n: int, m: int):
-        return ProcessedElem(self._chars + str(Op.repeat_n2m(elem, n, m)))
+    def repeat_n2m(self, elem: 'Union[Elem, str]', n: int, m: int, non_greedy: bool = False):
+        return ProcessedElem(self._chars + str(Op.repeat_n2m(elem, n, m, non_greedy)))
 
     def then(self, elem: 'Union[Elem, str]'):
         return ProcessedElem(self._chars + str(Op.then(elem)))
@@ -52,7 +52,7 @@ class ProcessedElem(Elem):
 
 
 class Group(Elem):
-    def __init__(self, elems_tuple: tuple[Union[str, Elem], ...], is_catch, is_alternative):
+    def __init__(self, elems_tuple: tuple[Union[str, Elem], ...], is_catch: bool = True, is_alternative: bool = False):
         super().__init__("")
         result_list = []
 
@@ -144,6 +144,21 @@ class PartNoticeCase(Group):
         self._chars = f"(?-i:{self._chars})"
 
 
+class Assertion(Elem):
+    def __init__(self, chars: str):
+        super().__init__("")
+        self._chars = chars
+
+    def __str__(self):
+        return self._chars
+
+
+class NLB(Assertion):
+    def __init__(self, chars: str):
+        super().__init__("")
+        self._chars = f"(?<!{''.join((Elem.Char(char) for char in chars))})"
+
+
 class Op:
     __REGEX_ESCAPE_COMMON = {
         r"\.", r"\^", r"\$", r"\*", r"\+", r"\?", r"\{", r"\}", r"\[", r"\]", r"\(", r"\)", r"\|", r"\\",
@@ -166,33 +181,53 @@ class Op:
 
     @classmethod
     def zero_or_once(cls, elem: Union[Elem, str]):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
         return ProcessedElem(f"(?:{elem})?") if cls.__if_group(elem) else ProcessedElem(f"{elem}?")
 
     @classmethod
-    def once_or_more(cls, elem: Union[Elem, str]):
+    def once_or_more(cls, elem: Union[Elem, str], non_greedy: bool = False):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
-        return ProcessedElem(f"(?:{elem})+") if cls.__if_group(elem) else ProcessedElem(f"{elem}+")
+        result_str = f"(?:{elem})+" if cls.__if_group(elem) else f"{elem}+"
+        result_str = result_str + "?" if non_greedy else result_str
+        return ProcessedElem(result_str)
 
     @classmethod
-    def zero_or_more(cls, elem: Union[Elem, str]):
+    def zero_or_more(cls, elem: Union[Elem, str], non_greedy: bool = False):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
-        return ProcessedElem(f"(?:{elem})*") if cls.__if_group(elem) else ProcessedElem(f"{elem}*")
+        result_str = f"(?:{elem})*" if cls.__if_group(elem) else f"{elem}*"
+        result_str = result_str + "?" if non_greedy else result_str
+        return ProcessedElem(result_str)
 
     @classmethod
     def repeat_n(cls, elem: Union[Elem, str], n: int):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
         return ProcessedElem(f"(?:{elem}){{{n}}}") if cls.__if_group(elem) else ProcessedElem(f"{elem}{{{n}}}")
 
     @classmethod
-    def repeat_at_least(cls, elem: Union[Elem, str], n: int):
+    def repeat_at_least(cls, elem: Union[Elem, str], n: int, non_greedy: bool = False):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
-        return ProcessedElem(f"(?:{elem}){{{n},}}") if cls.__if_group(elem) else ProcessedElem(f"{elem}{{{n},}}")
+        result_str = f"(?:{elem}){{{n},}}" if cls.__if_group(elem) else f"{elem}{{{n},}}"
+        result_str = result_str + "?" if non_greedy else result_str
+        return ProcessedElem(result_str)
 
     @classmethod
-    def repeat_n2m(cls, elem: Union[Elem, str], n: int, m: int):
+    def repeat_n2m(cls, elem: Union[Elem, str], n: int, m: int, non_greedy: bool = False):
+        if isinstance(elem, Assertion):
+            pass
         elem = cls.__check_and_process_elem(elem)
-        return ProcessedElem(f"(?:{elem}){{{n},{m}}}") if cls.__if_group(elem) else ProcessedElem(f"{elem}{{{n},{m}}}")
+        result_str = f"(?:{elem}){{{n},{m}}}" if cls.__if_group(elem) else f"{elem}{{{n},{m}}}"
+        result_str = result_str + "?" if non_greedy else result_str
+        return ProcessedElem(result_str)
 
     @classmethod
     def then(cls, elem: Union[Elem, str]):
@@ -227,24 +262,24 @@ class Regexp:
         self.__regexp += str(Op.zero_or_once(elem))
         return self
 
-    def once_or_more(self, elem: 'Union[Elem, str]'):
-        self.__regexp += str(Op.once_or_more(elem))
+    def once_or_more(self, elem: 'Union[Elem, str]', non_greedy: bool = False):
+        self.__regexp += str(Op.once_or_more(elem, non_greedy))
         return self
 
-    def zero_or_more(self, elem: 'Union[Elem, str]'):
-        self.__regexp += str(Op.zero_or_more(elem))
+    def zero_or_more(self, elem: 'Union[Elem, str]', non_greedy: bool = False):
+        self.__regexp += str(Op.zero_or_more(elem, non_greedy))
         return self
 
     def repeat_n(self, elem: 'Union[Elem, str]', n: int):
         self.__regexp += str(Op.repeat_n(elem, n))
         return self
 
-    def repeat_at_least(self, elem: 'Union[Elem, str]', n: int):
-        self.__regexp += str(Op.repeat_at_least(elem, n))
+    def repeat_at_least(self, elem: 'Union[Elem, str]', n: int, non_greedy: bool = False):
+        self.__regexp += str(Op.repeat_at_least(elem, n, non_greedy))
         return self
 
-    def repeat_n2m(self, elem: 'Union[Elem, str]', n: int, m: int):
-        self.__regexp += str(Op.repeat_n2m(elem, n, m))
+    def repeat_n2m(self, elem: 'Union[Elem, str]', n: int, m: int, non_greedy: bool = False):
+        self.__regexp += str(Op.repeat_n2m(elem, n, m, non_greedy))
         return self
 
     def then(self, elem: 'Union[Elem, str]'):

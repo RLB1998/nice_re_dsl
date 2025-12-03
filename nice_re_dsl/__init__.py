@@ -3,6 +3,7 @@ from .app import PartIgnoreCase, PartNoticeCase
 from .app import Op
 from .app import Regexp
 from .app import CSRange
+from .app import NLB
 
 ANY_CHAR = ProcessedElem('.')
 ANY_CHAR_MULTILINES = Group((ProcessedElem("?s:."),), is_catch=True, is_alternative=False)
